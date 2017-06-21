@@ -22,7 +22,6 @@ import org.jsoup.nodes.Element;
 import java.io.IOException;
 
 import fr.tnducrocq.boxe.model.Boxer;
-import fr.tnducrocq.boxe.model.CustomJsoupProcessor;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -117,13 +116,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
                 Element body = Jsoup.connect("http://boxrec.com/boxer/7035").get();
                 final Boxer boxer = JsoupProcessor.from(body, Boxer.class);
-                boxer.parse(body);
-
                 System.out.println(boxer.toString());
-                /*final NPM npm = JsoupProcessor.from(body, NPM.class);
-                if (npm == null) {
-                    return;
-                }*/
             } catch (IOException e) {
                 e.printStackTrace();
             }

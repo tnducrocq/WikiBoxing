@@ -1,5 +1,6 @@
 package fr.tnducrocq.boxe.model;
 
+import com.fcannizzaro.jsoup.annotations.interfaces.IParsable;
 import com.fcannizzaro.jsoup.annotations.interfaces.Text;
 
 import org.jsoup.nodes.Element;
@@ -18,7 +19,7 @@ enum Result {
 
 }
 
-public class Boxer {
+public class Boxer implements IParsable {
 
     @Text(".boxerTitle")
     public String title;
@@ -34,31 +35,27 @@ public class Boxer {
 
     public List<Result> last6;
 
-    @TextOptional(".profileDetails table tr:eq(2) td:eq(1) div:eq(1) li")
+    @Text(value = ".profileDetails table tr:eq(2) td:eq(1) div:eq(1) a", optional = true)
     public String ranking;
 
     public void parse(Element body) {
-        Elements elts = body.select(".profilePhoto").first().select(".last_6");
-        if (elts != null) {
-            last6 = new ArrayList<>();
-            for (Element elt : elts) {
-                String attr = elt.attr("class");
-                if (attr.contains("last_6_w")) {
-                    last6.add(Result.Win);
-                } else if (attr.contains("last_6_l")) {
-                    last6.add(Result.Loss);
-                } else if (attr.contains("last_6_d")) {
-                    last6.add(Result.Draw);
+        Element profilePhoto = body.select(".profilePhoto").first();
+        if (profilePhoto != null) {
+            Elements last6Elts = profilePhoto.select(".last_6");
+            if (last6Elts != null) {
+                last6 = new ArrayList<>();
+                for (Element elt : last6Elts) {
+                    String attr = elt.attr("class");
+                    if (attr.contains("last_6_w")) {
+                        last6.add(Result.Win);
+                    } else if (attr.contains("last_6_l")) {
+                        last6.add(Result.Loss);
+                    } else if (attr.contains("last_6_d")) {
+                        last6.add(Result.Draw);
+                    }
                 }
             }
         }
-        Element profileDetails = body.select(".profileDetails").first();
-        Element profileDetailsTable = profileDetails.select("table").first();
-        try {
-            ranking = profileDetailsTable.select("tr").get(2).select("td").get(1).select("div").get(1).select("a").first().text();
-        } catch (Exception e) {
-        }
-        System.out.println(ranking);
     }
 
 
@@ -69,6 +66,7 @@ public class Boxer {
         sb.append(", won='").append(won).append('\'');
         sb.append(", lost='").append(lost).append('\'');
         sb.append(", draw='").append(draw).append('\'');
+        sb.append(", ranking='").append(ranking).append('\'');
         if (last6 != null) {
             sb.append(", last6='");
             for (Result r : last6) {
